@@ -13,9 +13,10 @@ Phase 3 of the **Gents Saloon multi-tenant barbershop system**: the platform own
 ## For any AI working here
 
 1. Read [CLAUDE.md](CLAUDE.md) — coding rules (mandatory).
-2. Read [docs/PHASE_3_PLATFORM_DASHBOARD.md](docs/PHASE_3_PLATFORM_DASHBOARD.md) — the exact build plan (tasks T3.1–T3.6 with acceptance criteria).
-3. Follow [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — locked tokens (§7 covers this dashboard).
-4. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — where this app sits in the system.
+2. Read [docs/SECURITY.md](docs/SECURITY.md) — binding security rules S1–S9 (mandatory before any code).
+3. Read [docs/PHASE_3_PLATFORM_DASHBOARD.md](docs/PHASE_3_PLATFORM_DASHBOARD.md) — the exact build plan (tasks T3.1–T3.6 with acceptance criteria).
+4. Follow [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — locked tokens (§7 covers this dashboard).
+5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — where this app sits in the system.
 
 Canonical docs + full plan + backend: **https://github.com/Asadgill-1/gents-saloon-backend** (docs/MASTER_PLAN.md is the entry point). Doc copies here carry a synced-copy header — edit the canonical version first. **Prerequisites: backend Phases 0–1 and the shop dashboard (Phase 2) must exist first**; shared UI components are copied from [saloon-shop-dashboard](https://github.com/Asadgill-1/saloon-shop-dashboard), not imported.
 
