@@ -1,6 +1,6 @@
 # Rules for any AI working in this repo
 
-This repo is the **Phase 3 platform owner console** of the Gents Saloon system. Read [README.md](README.md), then [docs/SECURITY.md](docs/SECURITY.md) (binding S1–S9 rules — mandatory before any code), then [docs/PHASE_3_PLATFORM_DASHBOARD.md](docs/PHASE_3_PLATFORM_DASHBOARD.md). Full project context lives in the canonical repo: https://github.com/Asadgill-1/gents-saloon-backend (docs/PROJECT_CONTEXT.md, MASTER_PLAN.md). Then follow these rules for every change. In TypeScript, ponytail comments use `// ponytail:`.
+This repo is the **Phase 3 platform owner console** of the Gents Saloon system. Read [README.md](README.md), then [docs/SECURITY.md](docs/SECURITY.md) (binding S1–S11 rules — mandatory before any code), then [docs/PHASE_3_PLATFORM_DASHBOARD.md](docs/PHASE_3_PLATFORM_DASHBOARD.md). Full project context lives in the canonical repo: https://github.com/Asadgill-1/gents-saloon-backend (docs/PROJECT_CONTEXT.md, MASTER_PLAN.md). Then follow these rules for every change. In TypeScript, ponytail comments use `// ponytail:`.
 
 ## Skills to use (if installed)
 
