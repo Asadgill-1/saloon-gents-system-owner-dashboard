@@ -1,33 +1,40 @@
-# Saloon Platform Owner Dashboard
+# Gents Saloon Platform Dashboard
 
-Phase 3 of the **Gents Saloon multi-tenant barbershop system**: the platform owner's web console — the whole business managed from one place.
+> New agent or resumed session: read [STATUS.md](STATUS.md) first.
 
-- Shop onboarding wizard (web twin of the Master-bot flow: hours, bot tokens, services, barbers, commission rules)
-- Shops management (staff, services, commission history, suspend/activate, token replacement)
-- Global analytics across all shops
-- Escalations console (AI guardrail hits → block/monitor/resolve)
-- Blocked users, bot health board, audit explorer
+Phase 5 frontend for the platform owner’s SaaS operations.
 
-**Status: not built yet.** This repo will hold a Next.js (App Router) + Tailwind + shadcn/ui app at the repo root, `app_role=platform_admin` only, desktop-first. Deploys on **Vercel from `main`**.
+- Business-first onboarding with one primary owner and multiple shops.
+- Business-wide or per-shop manual cash subscriptions.
+- Due/expired views, hard suspend/resume, append-only receipts/reversals.
+- Tenant exports and export-first soft offboarding.
+- Global analytics, bot fleet, escalations, blocks, audit/security, and backup status.
 
-## For any AI working here
+Status: Phase 0 Next.js foundation and the narrow Phase 1 T1.5 database-authorized global platform shell are verified. Shared backend Phase 2 T2.0–T2.3 is complete and T2.4 checkout/payments/commission is next; Phase 1 audit gates remain open. Platform product screens still begin in Phase 5 after the backend gates.
 
-1. Read [CLAUDE.md](CLAUDE.md) — coding rules (mandatory).
-2. Read [docs/SECURITY.md](docs/SECURITY.md) — binding security rules S1–S11 (mandatory before any code).
-3. Read [docs/PHASE_3_PLATFORM_DASHBOARD.md](docs/PHASE_3_PLATFORM_DASHBOARD.md) — the exact build plan (tasks T3.1–T3.6 with acceptance criteria).
-4. Follow [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — locked tokens (§7 covers this dashboard).
-5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — where this app sits in the system.
+## Required reading
 
-Canonical docs + full plan + backend: **https://github.com/Asadgill-1/gents-saloon-backend** (docs/MASTER_PLAN.md is the entry point). Doc copies here carry a synced-copy header — edit the canonical version first. **Prerequisites: backend Phases 0–1 and the shop dashboard (Phase 2) must exist first**; shared UI components are copied from [saloon-shop-dashboard](https://github.com/Asadgill-1/saloon-shop-dashboard), not imported.
+1. [Current status](STATUS.md)
+2. [CLAUDE.md](CLAUDE.md)
+3. [Security](docs/SECURITY.md)
+4. [Phase 5 checklist](docs/PHASE_5_PLATFORM_DASHBOARD.md)
+5. [Design system](docs/DESIGN_SYSTEM.md)
+6. [Architecture](docs/ARCHITECTURE.md)
+
+Canonical backend/docs: [gents-saloon-backend](https://github.com/Asadgill-1/gents-saloon-backend).
 
 ## Stack
 
-Next.js App Router · Tailwind · shadcn/ui · Supabase JS (Auth email/password) · Lucide · Recharts. English only, dark theme default, desktop-first (≥1280px).
+Current foundation: Next.js App Router, strict TypeScript, Tailwind, Supabase SSR Auth, and a server-only FastAPI platform-authorization check. Planned Phase 5 additions such as shadcn/Radix, Lucide, charts, and product integrations are not installed or implemented yet.
 
-## Env (`.env.local` + Vercel project settings)
+## Public frontend environment
 
-```
+```text
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-NEXT_PUBLIC_API_BASE_URL=   # backend URL; local dev: http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
+
+No service-role key, database URL, bot/AI token, or global authorization rule belongs in this repository.
+
+Next.js DevTools MCP is not installed. Version `0.4.0` was removed after it introduced unresolved High dependency advisories; wait for an audited fixed release.

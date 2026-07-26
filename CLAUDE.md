@@ -1,6 +1,6 @@
 # Rules for any AI working in this repo
 
-This repo is the **Phase 3 platform owner console** of the Gents Saloon system. Read [README.md](README.md), then [docs/SECURITY.md](docs/SECURITY.md) (binding S1–S11 rules — mandatory before any code), then [docs/PHASE_3_PLATFORM_DASHBOARD.md](docs/PHASE_3_PLATFORM_DASHBOARD.md). Full project context lives in the canonical repo: https://github.com/Asadgill-1/gents-saloon-backend (docs/PROJECT_CONTEXT.md, MASTER_PLAN.md). Then follow these rules for every change. In TypeScript, ponytail comments use `// ponytail:`.
+This repo is the **Phase 5 platform-owner console** of the Gents Saloon system. Read [STATUS.md](STATUS.md), [README.md](README.md), [docs/SECURITY.md](docs/SECURITY.md), and [docs/PHASE_5_PLATFORM_DASHBOARD.md](docs/PHASE_5_PLATFORM_DASHBOARD.md) before code. Full project context lives in the canonical repo: https://github.com/Asadgill-1/gents-saloon-backend. In TypeScript, ponytail comments use `// ponytail:`.
 
 ## Skills to use (if installed)
 
@@ -10,10 +10,11 @@ This repo's workflow assumes these skills. Invoke them at the stated moments. **
 |---|---|---|---|
 | `/ponytail` | Start of ANY coding task (write, add, refactor, fix, review, choose dependency) | Enforces the lazy-senior sizing ladder: YAGNI → reuse repo code → stdlib → platform feature → installed dep → one line → minimum code | "Sizing ladder" section below — same rules, follow manually |
 | `/karpathy-guidelines` | Before writing or reviewing any code | Anti-LLM-mistake rules: understand first, state assumptions, surgical edits, verifiable success criteria | "Before writing code", "Surgical edits", "Verify" sections below |
+| `/ponytail-audit` | End of every implementation phase beside the security audit | Complexity-only review; never substitutes for security | Review unnecessary dependencies, wrappers, abstractions, and dead flexibility |
 | `/ponytail-debt` | End of every phase + before any release/deploy (phase docs' "Ponytail ledger" / completion notes expect this) | Harvests every `# ponytail:` comment in the repo into a debt ledger report so shortcuts don't rot | `grep -rn "ponytail:" backend/ frontend/` → list every hit (file:line, what's cut, upgrade path) in the phase completion note |
-| `/ui-ux-pro-max`, `/frontend-design`, `/design` | Start of Phase 2 and Phase 3 only | Design intelligence refinement | Tokens/wireframes/specs already embedded in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — locked, sufficient alone |
+| `/ui-ux-pro-max`, `/frontend-design`, `/design-system`, `/ui-styling` | Start of Phase 5 UI implementation | Design intelligence, tokens, accessible components | Canonical direction is [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) |
 
-Usage pattern per phase: `/ponytail` + `/karpathy-guidelines` at task start → build with rules below → `/ponytail-debt` at phase end, paste ledger into completion note.
+Usage pattern per phase: `/ponytail` + `/karpathy-guidelines` at task start → build with rules below → security audit + `/ponytail-audit` + `/ponytail-debt` at phase end.
 
 ## Sizing ladder — stop at first rung that holds
 
@@ -35,7 +36,7 @@ Two rungs work → take the higher one, move on.
 - No error handling for impossible scenarios — but always handle real failures (bad Supabase response, Celery task failure, Telegram API down, etc).
 - Deletion over addition. Boring over clever.
 - Fewest files, shortest working diff — but only after understanding the change.
-- Mark deliberate shortcuts inline as `# ponytail: <what's cut> — <upgrade path>` (e.g. `# ponytail: no retry on telegram send, add exponential backoff if delivery becomes unreliable`). These get collected later via the ponytail-debt process below — don't skip the comment.
+- Mark deliberate shortcuts inline as `// ponytail: <what's cut> — <upgrade path>`. These get collected later via the ponytail-debt process below.
 
 ## Before writing code
 
@@ -82,4 +83,4 @@ Shortcuts marked with `# ponytail:` comments are debt, not forgotten work. When 
 
 ## Status tracking
 
-Nothing is built here yet — scope for this repo is exactly [docs/PHASE_3_PLATFORM_DASHBOARD.md](docs/PHASE_3_PLATFORM_DASHBOARD.md). Requirements traceability + decision log live in the canonical backend repo (docs/REQUIREMENTS.md, docs/PROJECT_CONTEXT.md) — record new decisions there, then sync affected doc copies here.
+The Phase 0 technical foundation and Phase 1 T1.5 database-derived global platform authorization shell are locally verified. Shared backend Phase 2 T2.0–T2.3 is complete and T2.4 checkout/payments/commission is next; inherited Phase 1 audit gates remain open. Phase 5 product UI is not started. [STATUS.md](STATUS.md) is the repository handoff and must change whenever implementation status, blockers, or verification changes. Requirements traceability and durable decisions live in the canonical backend repo; update canonical first, then sync affected copies here. A dated security audit with zero unresolved Critical/High findings is mandatory at phase completion.
