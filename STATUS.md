@@ -33,7 +33,7 @@ npm run check                 PASS — lint, TypeScript, 5 tests, production bui
 npm audit --audit-level=high  PASS — 0 vulnerabilities
 ```
 
-Shared backend evidence confirms sixteen migrations are applied to the project-scoped Supabase development project and all 45 public tables are forced-RLS-enabled; only nine controlled journal-account rows exist and tenant/financial tables remain empty. Security Advisor has zero findings and missing FK indexes are zero. T2.6 now provides owner/platform-admin idempotent advance disbursement and closed-period payout create/approve/pay/cancel, derived from immutable commission/tip/correction snapshots with bounded one-time advance deduction and exact cash/journal settlement. The last committed dashboard checkpoint is clean, pushed, synchronized, and green in GitHub Actions at T2.5 commit `8c73502`; this T2.6 status update is local and uncommitted. The Phase 1 audit is not passed until credential rotation, authenticated repository-protection evidence, and a live Storage object round trip are proven.
+Shared backend evidence confirms sixteen migrations are applied to the project-scoped Supabase development project and all 45 public tables are forced-RLS-enabled; only nine controlled journal-account rows exist and tenant/financial tables remain empty. Security Advisor has zero findings and missing FK indexes are zero. T2.6 now provides owner/platform-admin idempotent advance disbursement and closed-period payout create/approve/pay/cancel, derived from immutable commission/tip/correction snapshots with bounded one-time advance deduction and exact cash/journal settlement. The T2.6 implementation/status checkpoint is committed, pushed, synchronized, and green in GitHub Actions at `2a44700`; backend/canonical is `324caec`. The Phase 1 audit is not passed until credential rotation, authenticated repository-protection evidence, and a live Storage object round trip are proven.
 
 ## Not implemented
 
@@ -51,7 +51,7 @@ Canonical source: [gents-saloon-backend](https://github.com/Asadgill-1/gents-sal
 
 ## Current next action
 
-Continue shared backend Phase 2 T2.7 reports and the provider-neutral e-invoicing boundary while preserving the open Phase 1 gates. T2.6 is complete locally/remotely; this repository's status update is not yet committed or pushed. The last T2.5 commit remains synchronized and green in CI. Do not start Phase 5 yet.
+Continue shared backend Phase 2 T2.7 reports and the provider-neutral e-invoicing boundary while preserving the open Phase 1 gates. T2.6 is complete locally/remotely and committed/pushed with green CI. Do not start Phase 5 yet.
 
 When Phase 5 is authorized, begin with `docs/PHASE_5_PLATFORM_DASHBOARD.md`, use the four required UI skills, implement server-verified platform-admin context first, and run the mandatory phase security audit before completion.
 
