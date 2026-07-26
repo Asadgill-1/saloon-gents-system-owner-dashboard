@@ -5,7 +5,7 @@ Last updated: **2026-07-26, Asia/Dubai**
 Repository phase: **Phase 0 foundation plus Phase 1 T1.5 global authorization shell complete locally**
 
 
-Shared backend phase: **Phase 2 T2.0–T2.3 complete; T2.4 checkout/payments/commission is next. Phase 1 audit gates remain open.**
+Shared backend phase: **Phase 2 T2.0–T2.4 complete; T2.5 void/refund/credit-note reversal is next. Phase 1 audit gates remain open.**
 Product phase: **Phase 5 not started**
 
 Read this file first when this repository is shared independently.
@@ -33,7 +33,7 @@ npm run check                 PASS — lint, TypeScript, 5 tests, production bui
 npm audit --audit-level=high  PASS — 0 vulnerabilities
 ```
 
-Shared backend evidence confirms eleven migrations are applied to the project-scoped Supabase development project, all 30 application tables are RLS-enabled and empty, and Security Advisor has zero findings. T2.3 now also provides effective VAT/non-VAT legal profiles, fiscal-year sale/credit-note counters, and idempotent cash-shift open/preview/movement/close APIs with exact reconciliation. Checkout, refunds, payouts, and journal APIs remain later Phase 2 tasks. The Phase 1 audit is not passed until credential rotation, remote CI/repository controls, and a live Storage object round trip are proven.
+Shared backend evidence confirms thirteen migrations are applied to the project-scoped Supabase development project and all 37 public tables are forced-RLS-enabled; only eight controlled journal-account rows exist and tenant/transaction tables remain empty. Security Advisor has zero findings and missing FK indexes are zero. T2.4 now provides idempotent completed-booking checkout with trusted legal/service/commission selection, inclusive/exclusive VAT, discounts, split cash/card tender, separate tips, restricted commission snapshots, cash-shift linkage, and a balanced append-only journal. Refunds, advances, and payouts remain later Phase 2 tasks. The prior dashboard checkpoint is clean and pushed at `b22ee5b`, and its GitHub Actions audit/lint/type/test/build pipeline passed; this synchronized T2.4 `STATUS.md` update is the current local change after that hash. The Phase 1 audit is not passed until credential rotation, authenticated repository-protection evidence, and a live Storage object round trip are proven.
 
 ## Not implemented
 
@@ -51,7 +51,7 @@ Canonical source: [gents-saloon-backend](https://github.com/Asadgill-1/gents-sal
 
 ## Current next action
 
-Continue shared backend Phase 2 T2.4 checkout/payments/commission while preserving the open Phase 1 gates. Separately review/commit/push this repository and require its CI. Do not start Phase 5 yet.
+Continue shared backend Phase 2 T2.5 void/refund/credit-note reversal while preserving the open Phase 1 gates. This repository's current foundation is already reviewed, committed, pushed, and green in CI. Do not start Phase 5 yet.
 
 When Phase 5 is authorized, begin with `docs/PHASE_5_PLATFORM_DASHBOARD.md`, use the four required UI skills, implement server-verified platform-admin context first, and run the mandatory phase security audit before completion.
 
