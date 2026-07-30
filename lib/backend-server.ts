@@ -1,7 +1,6 @@
 import "server-only";
 
 import { classifyPlatformAccess, type PlatformAccessState } from "@/lib/backend-contracts";
-import { readPublicEnvironment } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 export async function getPlatformAccess(): Promise<PlatformAccessState> {
@@ -19,8 +18,8 @@ export async function getPlatformAccess(): Promise<PlatformAccessState> {
       return { kind: "unauthenticated" };
     }
 
-    const env = readPublicEnvironment();
-    const response = await fetch(new URL("/api/v1/me/context", env.apiBaseUrl), {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.gents-saloon.com";
+    const response = await fetch(new URL("/api/v1/me/context", apiBaseUrl), {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: "no-store",
     });
