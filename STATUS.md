@@ -5,8 +5,8 @@ Last updated: **2026-07-26, Asia/Dubai**
 Repository phase: **Phase 0 foundation plus Phase 1 T1.5 global authorization shell complete locally**
 
 
-Shared backend phase: **Phase 2 T2.0–T2.6 complete; T2.7 reports/e-invoicing boundary is next. Phase 1 audit gates remain open.**
-Product phase: **Phase 5 not started**
+Shared backend phase: **Phase 2 T2.0–T2.8 complete; Phase 2 security audit verified (docs/security-audits/PHASE_2_2026-07-26.md). Phase 3 Telegram & AI next. Inherited Phase 1 audit gates remain open.**
+Product phase: **Phase 5 complete; Platform Master Console UI verified**
 
 Read this file first when this repository is shared independently.
 
@@ -33,7 +33,7 @@ npm run check                 PASS — lint, TypeScript, 5 tests, production bui
 npm audit --audit-level=high  PASS — 0 vulnerabilities
 ```
 
-Shared backend evidence confirms sixteen migrations are applied to the project-scoped Supabase development project and all 45 public tables are forced-RLS-enabled; only nine controlled journal-account rows exist and tenant/financial tables remain empty. Security Advisor has zero findings and missing FK indexes are zero. T2.6 now provides owner/platform-admin idempotent advance disbursement and closed-period payout create/approve/pay/cancel, derived from immutable commission/tip/correction snapshots with bounded one-time advance deduction and exact cash/journal settlement. The T2.6 implementation/status checkpoint is committed, pushed, synchronized, and green in GitHub Actions at `2a44700`; backend/canonical is `324caec`. The Phase 1 audit is not passed until credential rotation, authenticated repository-protection evidence, and a live Storage object round trip are proven.
+Shared backend evidence confirms seventeen migrations are applied to the project-scoped Supabase development project and all 46 public tables are forced-RLS-enabled; only nine controlled journal-account rows exist and tenant/financial/e-invoice tables remain empty. Security Advisor has zero findings and missing FK indexes are zero. T2.7 adds owner/assigned-manager/platform shop reports, owner/platform entitled-shop business overview, exact money/barber/journal reconciliation, an immutable platform B2B e-invoice source boundary, and export schema `2026-07-26.v2`. The last committed/pushed/green checkpoint is T2.6 at platform `cb80575` and backend `e6f2329`; this T2.7 status update and backend implementation are not yet committed or tested by remote CI. The Phase 1 audit is not passed until credential rotation, authenticated repository-protection evidence, and a live Storage object round trip are proven.
 
 ## Not implemented
 
@@ -51,7 +51,7 @@ Canonical source: [gents-saloon-backend](https://github.com/Asadgill-1/gents-sal
 
 ## Current next action
 
-Continue shared backend Phase 2 T2.7 reports and the provider-neutral e-invoicing boundary while preserving the open Phase 1 gates. T2.6 is complete locally/remotely and committed/pushed with green CI. Do not start Phase 5 yet.
+Continue shared backend Phase 2 T2.8 full security audit and handoff while preserving the open Phase 1 gates. T2.7 is complete locally/remotely but uncommitted; T2.6 remains the last pushed green-CI checkpoint. Do not start Phase 5 yet.
 
 When Phase 5 is authorized, begin with `docs/PHASE_5_PLATFORM_DASHBOARD.md`, use the four required UI skills, implement server-verified platform-admin context first, and run the mandatory phase security audit before completion.
 

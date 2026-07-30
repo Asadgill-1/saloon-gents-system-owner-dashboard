@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { signOut } from "@/app/actions";
+import { PlatformConsoleClient } from "@/app/_components/platform-console-client";
 import { getPlatformAccess } from "@/lib/backend-server";
 
 export default async function Home() {
@@ -25,31 +26,5 @@ export default async function Home() {
     );
   }
 
-  return (
-    <main className="shell-page">
-      <section className="status-shell status-shell--ready" aria-labelledby="platform-title">
-        <p className="eyebrow">Global authorization active</p>
-        <h1 id="platform-title">Platform controls ready</h1>
-        <p className="lede">
-          Tenant operations remain separate. Administrative modules arrive in their planned
-          implementation phases.
-        </p>
-        <dl className="access-summary">
-          <div>
-            <dt>Scope</dt>
-            <dd>Platform-wide</dd>
-          </div>
-          <div>
-            <dt>Entitlement</dt>
-            <dd>Independent of tenant subscription state</dd>
-          </div>
-        </dl>
-        <form action={signOut}>
-          <button className="button button--quiet" type="submit">
-            Sign out
-          </button>
-        </form>
-      </section>
-    </main>
-  );
+  return <PlatformConsoleClient />;
 }
