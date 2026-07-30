@@ -29,8 +29,9 @@ export default function LoginPage() {
         router.push("/");
         router.refresh();
       }
-    } catch {
-      setErrorMsg("An unexpected error occurred during sign in.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred during sign in.";
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,7 @@ export default function LoginPage() {
         {/* Form */}
         <form onSubmit={handleSignIn} className="space-y-5">
           {errorMsg && (
-            <div className="rounded-lg border border-red-500/30 bg-red-950/50 p-3 text-xs text-red-400 font-medium">
+            <div className="rounded-lg border border-red-500/30 bg-red-950/50 p-3 text-xs text-red-400 font-medium break-words">
               {errorMsg}
             </div>
           )}
@@ -67,7 +68,7 @@ export default function LoginPage() {
             <input
               type="email"
               required
-              placeholder="admin@platform.com"
+              placeholder="admin@saloon.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full min-h-[44px] rounded-lg border border-stone-700 bg-stone-950 px-4 py-2.5 text-sm text-stone-100 placeholder-stone-600 focus:border-yellow-500 focus:outline-none transition-colors"
