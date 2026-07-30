@@ -1,12 +1,16 @@
 import type { NextConfig } from "next";
 
 const isDevelopment = process.env.NODE_ENV === "development";
-const supabaseRealtimeUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/^http/, "ws");
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://butoxkmxkaybajoqrpza.supabase.co";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://witty-dogs-dig.loca.lt";
+
+const supabaseRealtimeUrl = SUPABASE_URL.replace(/^http/, "ws");
 const connectSources = [
   "'self'",
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  SUPABASE_URL,
   supabaseRealtimeUrl,
-  process.env.NEXT_PUBLIC_API_BASE_URL,
+  API_BASE_URL,
 ].filter(Boolean);
 const scriptSources = ["'self'", "'unsafe-inline'", isDevelopment && "'unsafe-eval'"].filter(
   Boolean,
