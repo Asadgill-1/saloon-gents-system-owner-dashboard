@@ -1,74 +1,9 @@
-"use client";
+import type { BotHealthItem, Page, TenantItem } from "@/lib/backend-contracts";
+import { Pager } from "./pager";
 
-export function BotFleetHealthView() {
-  const botFleetData = [
-    { id: "b-01", name: "Global Master Bot", role: "master", shop: "Global Platform", status: "healthy", webhook: "active", uptime: "99.99%" },
-    { id: "b-02", name: "Shop A Customer Bot", role: "customer", shop: "A One (Shop A1)", status: "healthy", webhook: "active", uptime: "99.95%" },
-    { id: "b-03", name: "Shop A Receptionist Bot", role: "receptionist", shop: "A One (Shop A1)", status: "healthy", webhook: "active", uptime: "99.95%" },
-    { id: "b-04", name: "Shop A Barber Crew Bot", role: "barber", shop: "A One (Shop A1)", status: "healthy", webhook: "active", uptime: "99.95%" },
-    { id: "b-05", name: "Shop A Owner Bot", role: "owner", shop: "A One (Shop A1)", status: "healthy", webhook: "active", uptime: "99.95%" },
-  ];
-
-  return (
-    <div className="space-y-6">
-      {/* Overview Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">Total Registered Bots</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-stone-900">201 / 201</p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">Active Webhooks</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-emerald-600">100%</p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">Celery Outbox Event Queue</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-blue-600">0 Pending</p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">System Health</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-emerald-600">ALL SYSTEMS OK</p>
-        </div>
-      </div>
-
-      {/* Bot Fleet List */}
-      <div className="rounded-xl border border-stone-200 bg-white shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-stone-200 bg-stone-50">
-          <h3 className="font-serif text-lg font-bold text-stone-900">Bot Fleet Status Overview</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-stone-700 font-mono">
-            <thead className="border-b border-stone-200 bg-white uppercase text-stone-500 font-sans font-bold">
-              <tr>
-                <th className="p-4">Bot Username / Label</th>
-                <th className="p-4">Role</th>
-                <th className="p-4">Shop Scope</th>
-                <th className="p-4 text-center">Webhook</th>
-                <th className="p-4 text-center">Health Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-200">
-              {botFleetData.map((bot) => (
-                <tr key={bot.id} className="hover:bg-stone-50 transition-colors">
-                  <td className="p-4 font-bold text-stone-900">{bot.name}</td>
-                  <td className="p-4 font-sans font-semibold uppercase">{bot.role}</td>
-                  <td className="p-4 font-sans">{bot.shop}</td>
-                  <td className="p-4 text-center">
-                    <span className="rounded bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-800 uppercase">
-                      {bot.webhook}
-                    </span>
-                  </td>
-                  <td className="p-4 text-center">
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-extrabold text-emerald-800 uppercase">
-                      {bot.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+export function BotFleetHealthView({ bots, tenants }: { bots: Page<BotHealthItem>; tenants: TenantItem[] }) {
+  const names = new Map(tenants.map((tenant) => [tenant.id, tenant.displayName]));
+  return <section className="space-y-6" aria-labelledby="bots-heading"><div className="rounded-xl border border-stone-200 bg-white p-5"><h2 id="bots-heading" className="text-2xl font-bold">Bot fleet health</h2><p className="mt-1 text-sm text-stone-500">Up to 50 bot registrations per page; credentials are never returned.</p></div>
+    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white"><div className="overflow-x-auto"><table className="w-full min-w-[60rem] text-left text-sm"><thead className="bg-stone-50 text-xs uppercase text-stone-500"><tr><th className="p-4">Bot</th><th className="p-4">Role</th><th className="p-4">Business scope</th><th className="p-4">Shop ID</th><th className="p-4">Registration</th><th className="p-4">Health</th><th className="p-4">Last check</th></tr></thead><tbody className="divide-y divide-stone-200">{bots.items.map((bot) => <tr key={bot.id}><td className="p-4 font-mono font-bold">@{bot.username}</td><td className="p-4 uppercase">{bot.role.replace("_", " ")}</td><td className="p-4">{bot.businessId ? names.get(bot.businessId) ?? bot.businessId : "Global platform"}</td><td className="p-4 font-mono text-xs text-stone-500">{bot.shopId ?? "—"}</td><td className="p-4"><span className="rounded-full border px-3 py-1 text-xs font-bold">{bot.active ? "Active" : "Inactive"}</span></td><td className="p-4"><span className={`rounded-full border px-3 py-1 text-xs font-bold ${bot.healthy ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-red-300 bg-red-50 text-red-700"}`}>{bot.healthy ? "Healthy" : "Needs attention"}</span></td><td className="p-4">{bot.lastHealthAt ? new Date(bot.lastHealthAt).toLocaleString("en-AE", { timeZone: "Asia/Dubai" }) : "No health check"}</td></tr>)}</tbody></table></div>{!bots.items.length && <p className="p-8 text-center text-stone-500">No bot registrations on this page.</p>}<Pager cursorKey="bots_cursor" nextCursor={bots.nextCursor} /></div>
+  </section>;
 }

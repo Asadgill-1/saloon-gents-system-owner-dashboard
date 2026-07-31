@@ -1,98 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
+import { platformAction } from "@/app/actions";
+import { INITIAL_ACTION_STATE, type PlatformActionState } from "@/lib/action-state";
+import type { OffboardingItem, Page, TenantItem } from "@/lib/backend-contracts";
+import { Pager } from "./pager";
 
-type OffboardingCase = {
-  id: string;
-  businessName: string;
-  requestedAt: string;
-  status: "requested" | "frozen" | "export_ready" | "delivered" | "archived";
-  checksum: string;
-};
+function Feedback({ state }: { state: PlatformActionState }) { return state.status === "idle" ? null : <p role="status" className={`mt-3 text-sm ${state.status === "error" ? "text-red-700" : "text-emerald-700"}`}>{state.message}{state.requestId ? ` Request ${state.requestId}.` : ""}</p>; }
 
-const INITIAL_CASES: OffboardingCase[] = [
-  {
-    id: "case-01",
-    businessName: "Business A LLC",
-    requestedAt: "2026-07-26 14:00",
-    status: "export_ready",
-    checksum: "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-];
+function CaseAction({ item, actionNonce }: { item: OffboardingItem; actionNonce: string }) {
+  const operation = item.state === "export_ready" ? "confirm_delivery" : item.state === "delivered" ? "archive_offboarding" : null;
+  const [state, action, pending] = useActionState(platformAction, INITIAL_ACTION_STATE); if (!operation) return null;
+  const id = operation === "confirm_delivery" ? item.exportId : item.id;
+  return <details className="min-w-72"><summary className={`min-h-[44px] cursor-pointer rounded-lg px-3 py-3 text-center text-xs font-bold ${operation === "archive_offboarding" ? "bg-red-600 text-white" : "border border-stone-300"}`}>{operation === "confirm_delivery" ? "Confirm delivery" : "Archive business"}</summary><form action={action} className="mt-3 rounded-lg border border-stone-200 bg-stone-50 p-4 text-left"><input type="hidden" name="operation" value={operation} /><input type="hidden" name={operation === "confirm_delivery" ? "exportId" : "caseId"} value={id} /><input type="hidden" name="idempotencyKey" value={`ui:${actionNonce}:${operation}:${id}`} /><p className="text-xs text-stone-600">This advances the irreversible offboarding sequence.</p><label className="mt-3 block text-xs font-bold">Type record ID<input name="confirmScope" required className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2 font-mono" /></label><label className="mt-3 block text-xs font-bold">Type CONFIRM<input name="confirmConsequence" required pattern="CONFIRM" className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2 font-mono" /></label><Feedback state={state} /><button disabled={pending} className={`mt-3 min-h-11 w-full rounded font-bold ${operation === "archive_offboarding" ? "bg-red-600 text-white" : "bg-stone-900 text-yellow-400"}`}>{pending ? "Working…" : "Confirm action"}</button></form></details>;
+}
 
-export function TenantOffboardingView() {
-  const [cases, setCases] = useState<OffboardingCase[]>(INITIAL_CASES);
-
-  const handleUpdateStatus = (id: string, nextStatus: OffboardingCase["status"]) => {
-    setCases((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: nextStatus } : c))
-    );
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-        <div>
-          <h2 className="font-serif text-2xl font-bold text-stone-900">Tenant Data Exports & Soft Offboarding</h2>
-          <p className="text-xs text-stone-500">
-            Export-first offboarding: Freeze → Export ZIP → Delivery Confirmation → Soft Archive
-          </p>
-        </div>
-      </div>
-
-      {/* Cases Table */}
-      <div className="rounded-xl border border-stone-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-stone-700 font-mono">
-            <thead className="border-b border-stone-200 bg-stone-50 uppercase text-stone-500 font-sans font-bold">
-              <tr>
-                <th className="p-4">Case ID</th>
-                <th className="p-4">Tenant Business</th>
-                <th className="p-4">Requested At</th>
-                <th className="p-4">SHA-256 Checksum</th>
-                <th className="p-4 text-center">Status</th>
-                <th className="p-4 text-right">Workflow Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-200">
-              {cases.map((c) => (
-                <tr key={c.id} className="hover:bg-stone-50 transition-colors">
-                  <td className="p-4 font-bold text-stone-900">{c.id}</td>
-                  <td className="p-4 font-sans font-bold text-stone-900">{c.businessName}</td>
-                  <td className="p-4">{c.requestedAt}</td>
-                  <td className="p-4 font-mono text-[10px] text-stone-500 truncate max-w-[12rem]">
-                    {c.checksum}
-                  </td>
-                  <td className="p-4 text-center">
-                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-[10px] font-bold text-yellow-800 uppercase border border-yellow-300">
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right font-sans">
-                    {c.status === "export_ready" && (
-                      <button
-                        onClick={() => handleUpdateStatus(c.id, "delivered")}
-                        className="min-h-[44px] rounded border border-stone-300 bg-stone-100 px-3 py-1.5 font-bold text-stone-700 hover:bg-stone-200"
-                      >
-                        Confirm Delivery
-                      </button>
-                    )}
-                    {c.status === "delivered" && (
-                      <button
-                        onClick={() => handleUpdateStatus(c.id, "archived")}
-                        className="min-h-[44px] rounded bg-red-600 px-3 py-1.5 font-bold text-white hover:bg-red-500"
-                      >
-                        Soft Archive Tenant
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+export function TenantOffboardingView({ cases, tenants, actionNonce }: { cases: Page<OffboardingItem>; tenants: TenantItem[]; actionNonce: string }) {
+  const [open, setOpen] = useState(false); const [state, action, pending] = useActionState(platformAction, INITIAL_ACTION_STATE); const names = new Map(tenants.map((tenant) => [tenant.id, tenant.displayName]));
+  return <section className="space-y-6" aria-labelledby="offboarding-heading"><div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-5"><div><h2 id="offboarding-heading" className="text-2xl font-bold">Exports & offboarding</h2><p className="mt-1 text-sm text-stone-500">Freeze, export, confirm delivery, then archive</p></div><button type="button" onClick={() => setOpen((value) => !value)} className="min-h-[44px] rounded-lg bg-red-600 px-5 font-bold text-white">{open ? "Close form" : "Begin offboarding"}</button></div>
+    {open && <form action={action} className="rounded-xl border border-red-300 bg-white p-6"><input type="hidden" name="operation" value="begin_offboarding" /><input type="hidden" name="idempotencyKey" value={`ui:${actionNonce}:begin-offboarding`} /><h3 className="text-lg font-bold">Begin business offboarding</h3><p className="mt-2 text-sm text-stone-600">This freezes the selected business and starts its encrypted export.</p><label className="mt-4 block text-sm font-semibold">Business<select name="businessId" required className="mt-2 min-h-12 w-full rounded border border-stone-300 bg-white px-3"><option value="">Choose business</option>{tenants.map((tenant) => <option key={tenant.id} value={tenant.id}>{tenant.displayName} · {tenant.id}</option>)}</select></label><label className="mt-4 block text-sm font-semibold">Reason<input name="reason" required maxLength={500} className="mt-2 min-h-12 w-full rounded border border-stone-300 px-3" /></label><label className="mt-4 block text-sm font-semibold">Type business ID<input name="confirmScope" required className="mt-2 min-h-12 w-full rounded border border-stone-300 px-3 font-mono" /></label><label className="mt-4 block text-sm font-semibold">Type CONFIRM<input name="confirmConsequence" required pattern="CONFIRM" className="mt-2 min-h-12 w-full rounded border border-stone-300 px-3 font-mono" /></label><Feedback state={state} /><button disabled={pending} className="mt-5 min-h-12 rounded bg-red-600 px-6 font-bold text-white">{pending ? "Starting…" : "Confirm offboarding"}</button></form>}
+    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white"><div className="overflow-x-auto"><table className="w-full min-w-[65rem] text-left text-sm"><thead className="bg-stone-50 text-xs uppercase text-stone-500"><tr><th className="p-4">Business</th><th className="p-4">Scope</th><th className="p-4">Reason</th><th className="p-4">Requested</th><th className="p-4">State</th><th className="p-4">Case / export IDs</th><th className="p-4 text-right">Action</th></tr></thead><tbody className="divide-y divide-stone-200">{cases.items.map((item) => <tr key={item.id}><td className="p-4 font-bold">{names.get(item.businessId) ?? "Business"}</td><td className="p-4">{item.scope}</td><td className="max-w-xs p-4">{item.reason}</td><td className="p-4">{new Date(item.requestedAt).toLocaleString("en-AE", { timeZone: "Asia/Dubai" })}</td><td className="p-4"><span className="rounded-full border px-3 py-1 text-xs font-bold uppercase">{item.state.replace("_", " ")}</span></td><td className="p-4 font-mono text-xs text-stone-500">Case {item.id}<br />Export {item.exportId}</td><td className="p-4 text-right"><CaseAction item={item} actionNonce={actionNonce} /></td></tr>)}</tbody></table></div>{!cases.items.length && <p className="p-8 text-center text-stone-500">No offboarding cases on this page.</p>}<Pager cursorKey="offboarding_cursor" nextCursor={cases.nextCursor} /></div>
+  </section>;
 }

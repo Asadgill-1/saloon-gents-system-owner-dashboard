@@ -2,9 +2,9 @@
 
 > Synced from the canonical backend repository. Edit canonical first.
 
-## Status — 2026-07-25
+## Status — 2026-07-31
 
-**Product UI not started.** Only the verified Phase 0 technical foundation exists. See [../STATUS.md](../STATUS.md). Do not begin until the required canonical backend SaaS/operations APIs are stable.
+**Incomplete; operational recovery is in progress.** Cookie-based Supabase SSR, database-derived platform authorization, FastAPI-backed operational views, keyset pagination, guarded idempotent server actions, and nonce-based script CSP are implemented on the recovery branch. Remaining platform modules, staging E2E/accessibility gates, and the dated Phase 5 security audit are still required. See [../STATUS.md](../STATUS.md).
 
 ## Outcome
 

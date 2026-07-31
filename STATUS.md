@@ -2,10 +2,10 @@
 
 Last updated: **2026-07-31, Asia/Dubai**
 
-Repository phase: **Phase 5 incomplete; recovery branch contains a visual prototype**
+Repository phase: **Phase 5 incomplete; operational recovery is in progress**
 
 Shared backend phase: **Phase 2 T2.0–T2.8 complete; Phase 2 security audit verified (docs/security-audits/PHASE_2_2026-07-26.md). Phase 3 Telegram & AI next. Inherited Phase 1 audit gates remain open.**
-Product phase: **Phase 5 not complete; SSR auth, backend operations, E2E, and security audit remain**
+Product phase: **Phase 5 not complete; core SSR/backend operations are implemented, but remaining modules, E2E/accessibility, staging proof, and security audit remain**
 
 Read this file first when this repository is shared independently.
 
@@ -14,73 +14,53 @@ Read this file first when this repository is shared independently.
 - Locked Next.js 16, React 19, Tailwind 4, strict TypeScript, ESLint, and npm dependencies.
 - Supabase SSR browser/server/proxy clients.
 - Proxy session refresh plus server-side claims verification in the protected route group.
-- Public `/login` with a retained dark-gold visual design; cookie-based SSR sign-in still needs repair.
-- Protected `/` global platform visual shell with 6 prototype modules:
-  - **Platform Header**: session-aware admin display and sign-out.
-  - **Tenant Fleet**: table with onboarding modal, subscription status, and search.
-  - **Billing & Cash Receipts**: receipt recording and reversal.
-  - **Offboarding & Export**: guided confirmation workflow.
-  - **Bot Fleet Health**: per-tenant bot status monitor.
-  - **SaaS Executive Analytics**: revenue, tenant, and growth KPIs.
+- Real cookie-based Supabase SSR email/password sign-in with safe user-facing errors and no hardcoded project fallback.
+- Protected platform console backed by `GET /platform/tenants`, subscriptions, cash receipts, offboarding cases, bot health, and analytics.
+- Tenant onboarding, shop creation, staff invitations, bot registration, legal/tax setup, billing-mode transition, cash receipts/reversals, subscription suspend/resume, and offboarding delivery/archive use authenticated idempotent Server Actions.
+- Suspension, reversal, billing-mode, delivery, offboarding, and archive flows require a reason where applicable plus typed scope and `CONFIRM` checks.
+- UUID keyset pagination renders at most 50 tenant/subscription/receipt/offboarding/bot/analytics rows per page; the 201-bot fleet is no longer hardcoded.
+- Backend request IDs are shown with stable safe errors; raw API/Supabase messages are not exposed.
 - The root server component verifies Supabase claims, forwards only the raw access token to `GET /api/v1/me/context`, and admits only a database-derived active platform administrator.
 - Tenant owners/staff, authorization failures, and backend errors receive one neutral `Access unavailable` state with no tenant data.
 - Platform authorization does not call a tenant entitlement route, so a suspended tenant cannot block global platform administration.
 - Server-side sign-out action verifies claims before clearing the Supabase session.
 - Responsive semantic light-platform status UI using canonical stone/gold tokens, visible focus, and 44px controls.
-- Production HTTPS environment validation.
-- CSP, HSTS, referrer, frame, content-type, and permissions headers (CSP `connect-src` hardcoded for Supabase URL).
+- Fail-closed production HTTPS environment validation with no placeholder, project, API-domain, or localtunnel fallbacks.
+- Request-nonce script CSP plus HSTS, referrer, frame, content-type, and permissions headers.
 - SHA-pinned, read-only GitHub CI with full-history secret scan, `npm ci --ignore-scripts`, audit, lint, types, tests, and build.
-- Four environment/platform-authorization contract/privacy tests.
+- Six environment/platform-authorization/response-contract tests.
 - A prior Vercel deployment exists, but it is not production-ready or Phase 5 completion evidence.
 
 Latest local evidence:
 
 ```text
-npm run check                 PASS — lint, TypeScript, 4 tests, production build
+npm run check                 PASS — lint, TypeScript, 6 tests, production build
 npm audit --audit-level=high  PASS — 0 vulnerabilities
 ```
 
 Last remote-main checkpoint before recovery: `7c08910`; recovery work is isolated on `codex/full-recovery`.
 
-## Inherited authentication and configuration defect
+## Authentication and configuration recovery
 
-Login at `saloon-gents-system-owner-dashboard.vercel.app/login` returns **"Invalid path specified in request URL"** from the Supabase client on sign-in.
-
-**Confirmed working:**
-- Supabase URL `https://butoxkmxkaybajoqrpza.supabase.co` and anon key are valid.
-- Direct Node.js HTTP POST to `/auth/v1/token?grant_type=password` returns HTTP 200 with valid JWT.
-- User `admin@saloon.com` exists in Supabase Auth and credentials work.
-- Local build and all tests pass.
-
-**Unsafe workarounds to remove:**
-1. `NEXT_PUBLIC_*` env vars set in Vercel project settings (Production and Preview).
-2. Supabase URL and anon key were hardcoded as fallbacks in `lib/supabase/client.ts`, `server.ts`, and `proxy.ts`.
-3. CSP `connect-src` was hardcoded to include one Supabase project in `next.config.ts`.
-4. The browser client was switched away from the supported cookie-based `createBrowserClient` pattern.
-
-**Likely remaining causes:**
-1. Version incompatibility: `@supabase/supabase-js` v2.110.8 / `@supabase/ssr` v0.12.3 on Vercel serverless runtime.
-2. Proxy middleware `getClaims()` may construct an invalid JWKS path on server side.
-3. Vercel Edge/Node runtime may handle the Supabase client differently.
-4. Non-SSR `createClient` may not handle cookies properly in Vercel context.
+The unsupported browser client, embedded Supabase URL/public key, API/localtunnel fallbacks, and hardcoded CSP source were removed. Browser, Server Component, Server Action, and proxy clients now use the supported `@supabase/ssr` cookie pattern and fail closed when environment configuration is absent. Live isolated-staging/Vercel authentication proof is still required before the defect is considered production-closed.
 
 ## Not implemented
 
-- Cookie-based Supabase SSR sign-in without hardcoded project fallbacks.
-- Real tenant/shop onboarding, staff invitation, bot setup, legal/tax, billing, receipt/reversal, suspension, offboarding, health, audit, and analytics backend flows.
-- Pagination and double-confirmed high-impact mutations.
+- Standalone export request/download UI, audit/security/backup/escalation/blocked-user views, and detailed business/shop drill-down.
+- Shop-ID discovery/detail reads for setup forms; the current recovery form requires the database-authorized shop UUID.
+- Signed export download and checksum display after export completion.
 - Backend deployment to production (runs locally only; `NEXT_PUBLIC_API_BASE_URL` requires a live backend).
 - E2E tests.
 
 ## Current next action
 
-Restore supported Supabase SSR/authentication, remove hardcoded project/API fallbacks, and connect each retained screen to the backend before the Phase 5 Playwright and security gates.
+Complete the remaining platform modules and shop detail read interface, then run isolated-staging Playwright/accessibility and the dated Phase 5 security audit.
 
 ## Security and MCP
 
 - No service-role key, database URL, bot token, AI token, or global authorization rule belongs in this repository or a `NEXT_PUBLIC_*` variable.
 - The Supabase publishable/anon key remains public but must be supplied by environment configuration so staging, previews, and production stay isolated.
 - Middleware/proxy is not the sole authorization control; protected layouts/routes and every API operation must verify platform authorization server-side.
-- Current framework-compatible CSP permits inline bootstrap scripts. Replace with nonce/hash CSP before production.
+- Production script CSP is request-nonce based; style inline permission remains limited to framework/CSS requirements and must be reviewed in the Phase 5 audit.
 - `next-devtools-mcp@0.4.0` was removed because it introduced unresolved High npm advisories. Do not install it until an audited fixed release exists.
 - Root finding P0-SEC-010 is fixed: the dashboard uses Next's direct ESLint plugin flat config, and its full dependency audit is clean.

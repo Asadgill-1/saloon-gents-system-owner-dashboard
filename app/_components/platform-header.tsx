@@ -3,11 +3,12 @@
 import { signOut } from "@/app/actions";
 
 type PlatformHeaderProps = {
+  displayName: string;
   activeTab: string;
   onTabChange: (tab: string) => void;
 };
 
-export function PlatformHeader({ activeTab, onTabChange }: PlatformHeaderProps) {
+export function PlatformHeader({ displayName, activeTab, onTabChange }: PlatformHeaderProps) {
   return (
     <header className="w-full border-b border-stone-200 bg-white px-4 py-3 text-stone-900 shadow-sm">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
@@ -25,12 +26,12 @@ export function PlatformHeader({ activeTab, onTabChange }: PlatformHeaderProps) 
                 Global Admin
               </span>
             </div>
-            <p className="text-xs text-stone-500">SaaS Multi-Tenant Operations & Financial Controls</p>
+            <p className="text-xs text-stone-500">Signed in as {displayName}</p>
           </div>
         </div>
 
         {/* Global Navigation Tabs */}
-        <nav className="flex flex-wrap items-center gap-1 rounded-xl bg-stone-100 p-1 border border-stone-200">
+        <nav aria-label="Platform sections" className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-xl border border-stone-200 bg-stone-100 p-1 lg:order-none lg:w-auto">
           {[
             { id: "tenants", label: "Tenants & Onboarding" },
             { id: "billing", label: "Billing & Cash" },
@@ -42,7 +43,9 @@ export function PlatformHeader({ activeTab, onTabChange }: PlatformHeaderProps) 
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => onTabChange(tab.id)}
+                aria-current={isActive ? "page" : undefined}
                 className={`min-h-[44px] rounded-lg px-3.5 py-2 text-xs font-bold transition-all ${
                   isActive
                     ? "bg-stone-900 text-yellow-400 shadow"

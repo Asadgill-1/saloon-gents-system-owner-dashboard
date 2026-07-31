@@ -1,190 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
+import { platformAction } from "@/app/actions";
+import { INITIAL_ACTION_STATE } from "@/lib/action-state";
+import type { Page, TenantItem } from "@/lib/backend-contracts";
+import { Pager } from "./pager";
+import { TenantSetupTools } from "./tenant-setup-tools";
 
-type TenantRecord = {
-  id: string;
-  name: string;
-  ownerEmail: string;
-  shopsCount: number;
-  billingMode: "business" | "per_shop";
-  status: "active" | "suspended" | "expired";
-  paidUntil: string;
-};
+export function TenantFleetView({ tenants, actionNonce }: { tenants: Page<TenantItem>; actionNonce: string }) {
+  const [open, setOpen] = useState(false); const [state, action, pending] = useActionState(platformAction, INITIAL_ACTION_STATE);
+  return <section className="space-y-6" aria-labelledby="tenants-heading">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm"><div><h2 id="tenants-heading" className="text-2xl font-bold">Business tenants</h2><p className="mt-1 text-sm text-stone-500">{tenants.items.length} businesses on this page</p></div><button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="min-h-[44px] rounded-lg bg-stone-900 px-5 font-bold text-yellow-400 hover:bg-stone-800">{open ? "Close onboarding" : "Onboard business"}</button></div>
 
-const INITIAL_TENANTS: TenantRecord[] = [
-  {
-    id: "10000000-0000-0000-0000-000000000001",
-    name: "Business A LLC",
-    ownerEmail: "owner.a@example.com",
-    shopsCount: 2,
-    billingMode: "business",
-    status: "active",
-    paidUntil: "2026-12-31",
-  },
-  {
-    id: "10000000-0000-0000-0000-000000000002",
-    name: "Business B Saloons",
-    ownerEmail: "owner.b@example.com",
-    shopsCount: 1,
-    billingMode: "per_shop",
-    status: "active",
-    paidUntil: "2026-12-31",
-  },
-];
-
-export function TenantFleetView() {
-  const [tenants, setTenants] = useState<TenantRecord[]>(INITIAL_TENANTS);
-  const [isOnboardOpen, setIsOnboardOpen] = useState(false);
-  const [newBusinessName, setNewBusinessName] = useState("");
-  const [newOwnerUserId, setNewOwnerUserId] = useState("");
-  const [newBillingMode, setNewBillingMode] = useState<"business" | "per_shop">("business");
-
-  const handleOnboard = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newBusinessName.trim()) return;
-    const newTenant: TenantRecord = {
-      id: `10000000-0000-0000-0000-${(tenants.length + 1).toString().padStart(12, "0")}`,
-      name: newBusinessName,
-      ownerEmail: newOwnerUserId || "new.owner@example.com",
-      shopsCount: 1,
-      billingMode: newBillingMode,
-      status: "active",
-      paidUntil: "2026-12-31",
-    };
-    setTenants([...tenants, newTenant]);
-    setNewBusinessName("");
-    setNewOwnerUserId("");
-    setIsOnboardOpen(false);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Fleet Banner & Onboard Action */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-        <div>
-          <h2 className="font-serif text-2xl font-bold text-stone-900">Tenant Saloon Fleet</h2>
-          <p className="text-xs text-stone-500">
-            {tenants.length} registered business tenants on platform
-          </p>
-        </div>
-        <button
-          onClick={() => setIsOnboardOpen(true)}
-          className="min-h-[44px] rounded-lg bg-stone-900 px-5 py-2.5 font-bold text-yellow-400 hover:bg-stone-800 transition-all shadow"
-        >
-          + Onboard New Saloon Business
-        </button>
+    {open && <form action={action} className="rounded-xl border border-yellow-500/40 bg-white p-6 shadow-sm">
+      <input type="hidden" name="operation" value="onboard_tenant" /><input type="hidden" name="idempotencyKey" value={`ui:${actionNonce}:onboard-tenant`} />
+      <h3 className="text-xl font-bold">Business, owner, first shop, and initial coverage</h3><p className="mt-1 text-sm text-stone-500">All four records are created atomically by the platform API.</p>
+      <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Field name="legalName" label="Business legal name" required /><Field name="displayName" label="Business display name" required />
+        <Select name="billingMode" label="Billing scope" options={[["business", "Business-wide"], ["per_shop", "Per shop"]]} />
+        <Field name="ownerAuthUserId" label="Owner account UUID" required mono /><Field name="ownerDisplayName" label="Owner display name" required /><Field name="ownerPhone" label="Owner phone (optional)" />
+        <Field name="contactName" label="Billing contact (optional)" /><Field name="contactEmail" label="Contact email (optional)" type="email" /><Field name="contactPhone" label="Contact phone (optional)" />
+        <Field name="shopName" label="First shop name" required /><Field name="shopInternalCode" label="Shop internal code" required mono pattern="[A-Z0-9][A-Z0-9_-]*" />
+        <Field name="defaultServiceMinutes" label="Default service minutes" required type="number" min="5" max="480" defaultValue="30" />
+        <Field name="shopOpenTime" label="Opening time" required type="time" defaultValue="09:00" /><Field name="shopCloseTime" label="Closing time" required type="time" defaultValue="22:00" /><Field name="shopEodTime" label="End-of-day time" required type="time" defaultValue="23:00" />
+        <Field name="paidFrom" label="Coverage from" required type="date" /><Field name="paidUntil" label="Coverage until" required type="date" /><Field name="initialPaymentAmount" label="Initial payment (AED)" required inputMode="decimal" pattern="\d+(\.\d{1,2})?" />
+        <Field name="initialReceiptReference" label="Initial receipt reference" required mono /><Field name="tradeLicenseNumber" label="Trade licence (optional)" /><Field name="tradeLicenseExpiry" label="Trade licence expiry" type="date" />
+        <Select name="vatRegistered" label="VAT registration" options={[["false", "Not VAT registered"], ["true", "VAT registered"]]} /><Field name="trn" label="TRN if VAT registered" pattern="[0-9]{15}" mono /><Field name="invoiceAddress" label="Invoice address (optional)" />
       </div>
+      {state.status !== "idle" && <p role="status" className={`mt-5 rounded-lg p-3 text-sm ${state.status === "error" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"}`}>{state.message}{state.requestId ? ` Request ${state.requestId}.` : ""}</p>}
+      <button type="submit" disabled={pending} className="mt-5 min-h-12 rounded-lg bg-stone-900 px-6 font-bold text-yellow-400 hover:bg-stone-800 disabled:cursor-wait disabled:opacity-60">{pending ? "Onboarding…" : "Onboard business"}</button>
+    </form>}
 
-      {/* Tenants Table */}
-      <div className="rounded-xl border border-stone-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-stone-700">
-            <thead className="border-b border-stone-200 bg-stone-50 uppercase text-stone-500 font-bold">
-              <tr>
-                <th className="p-4">Business Legal Name</th>
-                <th className="p-4">Owner Contact</th>
-                <th className="p-4 text-center">Shops</th>
-                <th className="p-4">Billing Scope</th>
-                <th className="p-4">Coverage Paid Until</th>
-                <th className="p-4 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-200">
-              {tenants.map((t) => (
-                <tr key={t.id} className="hover:bg-stone-50 transition-colors">
-                  <td className="p-4">
-                    <p className="font-bold text-stone-900 text-sm">{t.name}</p>
-                    <p className="font-mono text-[10px] text-stone-400">{t.id}</p>
-                  </td>
-                  <td className="p-4 font-mono">{t.ownerEmail}</td>
-                  <td className="p-4 text-center font-bold">{t.shopsCount}</td>
-                  <td className="p-4 font-semibold uppercase">{t.billingMode}</td>
-                  <td className="p-4 font-mono font-bold text-stone-800">{t.paidUntil}</td>
-                  <td className="p-4 text-center">
-                    <span
-                      className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider ${
-                        t.status === "active"
-                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                          : "bg-red-100 text-red-800 border border-red-300"
-                      }`}
-                    >
-                      {t.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm"><div className="overflow-x-auto"><table className="w-full min-w-[50rem] text-left text-sm"><thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wider text-stone-500"><tr><th className="p-4">Business</th><th className="p-4">Legal name</th><th className="p-4">Billing</th><th className="p-4 text-center">Shops</th><th className="p-4">Status</th><th className="p-4">Created</th></tr></thead><tbody className="divide-y divide-stone-200">{tenants.items.map((tenant) => <tr key={tenant.id}><td className="p-4"><p className="font-bold">{tenant.displayName}</p><p className="mt-1 font-mono text-xs text-stone-400">{tenant.id}</p></td><td className="p-4">{tenant.legalName}</td><td className="p-4">{tenant.billingMode.replace("_", " ")}</td><td className="p-4 text-center font-bold">{tenant.shopCount}</td><td className="p-4"><span className="rounded-full border border-stone-300 px-3 py-1 text-xs font-bold uppercase">{tenant.status}</span></td><td className="p-4 text-stone-500">{new Date(tenant.createdAt).toLocaleDateString("en-AE", { timeZone: "Asia/Dubai" })}</td></tr>)}</tbody></table></div>{!tenants.items.length && <p className="p-8 text-center text-stone-500">No businesses on this page.</p>}<Pager cursorKey="tenants_cursor" nextCursor={tenants.nextCursor} /></div>
+    <TenantSetupTools tenants={tenants.items} actionNonce={actionNonce} />
+  </section>;
+}
 
-      {/* Onboard Modal */}
-      {isOnboardOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl space-y-4">
-            <h3 className="font-serif text-xl font-bold text-stone-900">Onboard New Saloon Business</h3>
-            <form onSubmit={handleOnboard} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1">
-                  Business Legal Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Royal Gents Saloon LLC"
-                  value={newBusinessName}
-                  onChange={(e) => setNewBusinessName(e.target.value)}
-                  className="w-full min-h-[44px] rounded-lg border border-stone-300 bg-white px-4 text-stone-900 focus:border-stone-900 focus:outline-none"
-                />
-              </div>
+function Field(props: { name: string; label: string; required?: boolean; mono?: boolean; type?: string; pattern?: string; min?: string; max?: string; defaultValue?: string; inputMode?: "decimal" }) {
+  return <div><label htmlFor={props.name} className="mb-2 block text-sm font-semibold text-stone-700">{props.label}</label><input id={props.name} name={props.name} required={props.required} type={props.type} pattern={props.pattern} min={props.min} max={props.max} defaultValue={props.defaultValue} inputMode={props.inputMode} className={`min-h-12 w-full rounded-lg border border-stone-300 px-3 focus:border-stone-900 focus:outline-none ${props.mono ? "font-mono text-sm" : ""}`} /></div>;
+}
 
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1">
-                  Primary Owner Auth User ID (UUID)
-                </label>
-                <input
-                  type="text"
-                  placeholder="00000000-0000-0000-0000-000000000002"
-                  value={newOwnerUserId}
-                  onChange={(e) => setNewOwnerUserId(e.target.value)}
-                  className="w-full min-h-[44px] rounded-lg border border-stone-300 bg-white px-4 font-mono text-xs text-stone-900 focus:border-stone-900 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1">
-                  Billing Scope
-                </label>
-                <select
-                  value={newBillingMode}
-                  onChange={(e) => setNewBillingMode(e.target.value as "business" | "per_shop")}
-                  className="w-full min-h-[44px] rounded-lg border border-stone-300 bg-white px-4 text-stone-900 focus:border-stone-900 focus:outline-none"
-                >
-                  <option value="business">Business Wide Coverage</option>
-                  <option value="per_shop">Per-Shop Individual Coverage</option>
-                </select>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsOnboardOpen(false)}
-                  className="min-h-[44px] flex-1 rounded-lg border border-stone-300 bg-white font-bold text-stone-700 hover:bg-stone-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="min-h-[44px] flex-1 rounded-lg bg-stone-900 font-bold text-yellow-400 hover:bg-stone-800"
-                >
-                  Onboard Tenant
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+function Select({ name, label, options }: { name: string; label: string; options: string[][] }) {
+  return <div><label htmlFor={name} className="mb-2 block text-sm font-semibold text-stone-700">{label}</label><select id={name} name={name} className="min-h-12 w-full rounded-lg border border-stone-300 bg-white px-3 focus:border-stone-900 focus:outline-none">{options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}</select></div>;
 }

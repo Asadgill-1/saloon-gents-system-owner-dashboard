@@ -1,195 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
+import { platformAction } from "@/app/actions";
+import { INITIAL_ACTION_STATE } from "@/lib/action-state";
+import type { Page, ReceiptItem, SubscriptionItem, TenantItem } from "@/lib/backend-contracts";
+import { Pager } from "./pager";
 
-type CashReceipt = {
-  id: string;
-  businessName: string;
-  amount: number;
-  reference: string;
-  coverageFrom: string;
-  coverageUntil: string;
-  status: "active" | "reversed";
-  einvoiceStatus: "b2b_prepared";
-};
+type Props = { subscriptions: Page<SubscriptionItem>; receipts: Page<ReceiptItem>; tenants: TenantItem[]; actionNonce: string };
 
-const INITIAL_RECEIPTS: CashReceipt[] = [
-  {
-    id: "40000000-0000-0000-0000-000000000001",
-    businessName: "Business A LLC",
-    amount: 500,
-    reference: "CASH-REC-2026-001",
-    coverageFrom: "2026-07-01",
-    coverageUntil: "2026-12-31",
-    status: "active",
-    einvoiceStatus: "b2b_prepared",
-  },
-  {
-    id: "40000000-0000-0000-0000-000000000002",
-    businessName: "Business B Saloons",
-    amount: 300,
-    reference: "CASH-REC-2026-002",
-    coverageFrom: "2026-07-01",
-    coverageUntil: "2026-12-31",
-    status: "active",
-    einvoiceStatus: "b2b_prepared",
-  },
-];
+function Result({ state }: { state: typeof INITIAL_ACTION_STATE }) { return state.status === "idle" ? null : <p role="status" className={`mt-3 text-sm ${state.status === "error" ? "text-red-700" : "text-emerald-700"}`}>{state.message}{state.requestId ? ` Request ${state.requestId}.` : ""}</p>; }
 
-export function BillingSubscriptionsView() {
-  const [receipts, setReceipts] = useState<CashReceipt[]>(INITIAL_RECEIPTS);
-  const [isCollectOpen, setIsCollectOpen] = useState(false);
-  const [amount, setAmount] = useState<number>(500);
-  const [reference, setReference] = useState<string>("CASH-REC-2026-003");
-
-  const handleCollectCash = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reference.trim()) return;
-    const newReceipt: CashReceipt = {
-      id: `40000000-0000-0000-0000-${(receipts.length + 1).toString().padStart(12, "0")}`,
-      businessName: "Business A LLC",
-      amount,
-      reference,
-      coverageFrom: "2026-08-01",
-      coverageUntil: "2027-01-31",
-      status: "active",
-      einvoiceStatus: "b2b_prepared",
-    };
-    setReceipts([newReceipt, ...receipts]);
-    setIsCollectOpen(false);
-  };
-
-  const handleReverse = (id: string) => {
-    setReceipts((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: "reversed" } : r))
-    );
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Header & Collect Cash Action */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-        <div>
-          <h2 className="font-serif text-2xl font-bold text-stone-900">Subscription Cash Receipts & Billing</h2>
-          <p className="text-xs text-stone-500">
-            Sequential append-only cash collection & B2B e-invoice source envelopes
-          </p>
-        </div>
-        <button
-          onClick={() => setIsCollectOpen(true)}
-          className="min-h-[44px] rounded-lg bg-stone-900 px-5 py-2.5 font-bold text-yellow-400 hover:bg-stone-800 transition-all shadow"
-        >
-          + Record Subscription Cash Receipt
-        </button>
-      </div>
-
-      {/* Receipts Table */}
-      <div className="rounded-xl border border-stone-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-stone-700 font-mono">
-            <thead className="border-b border-stone-200 bg-stone-50 uppercase text-stone-500 font-sans font-bold">
-              <tr>
-                <th className="p-4">Receipt Ref</th>
-                <th className="p-4">Tenant Business</th>
-                <th className="p-4 text-right">Amount (AED)</th>
-                <th className="p-4">Coverage Period</th>
-                <th className="p-4 text-center">B2B E-Invoice Source</th>
-                <th className="p-4 text-center">Status</th>
-                <th className="p-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-200">
-              {receipts.map((r) => (
-                <tr key={r.id} className="hover:bg-stone-50 transition-colors">
-                  <td className="p-4 font-bold text-stone-900">{r.reference}</td>
-                  <td className="p-4 font-sans font-bold text-stone-900">{r.businessName}</td>
-                  <td className="p-4 text-right font-bold text-emerald-700">AED {r.amount.toFixed(2)}</td>
-                  <td className="p-4">{r.coverageFrom} → {r.coverageUntil}</td>
-                  <td className="p-4 text-center">
-                    <span className="rounded bg-blue-100 px-2.5 py-1 text-[10px] font-bold text-blue-800 uppercase border border-blue-300">
-                      {r.einvoiceStatus}
-                    </span>
-                  </td>
-                  <td className="p-4 text-center">
-                    <span
-                      className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase ${
-                        r.status === "active"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    {r.status === "active" && (
-                      <button
-                        onClick={() => handleReverse(r.id)}
-                        className="min-h-[44px] rounded border border-stone-300 bg-stone-100 px-3 py-1.5 font-sans text-xs font-bold text-stone-700 hover:border-red-500 hover:text-red-600"
-                      >
-                        Mirror Reversal
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Collect Cash Modal */}
-      {isCollectOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl space-y-4">
-            <h3 className="font-serif text-xl font-bold text-stone-900">Record Subscription Cash Receipt</h3>
-            <form onSubmit={handleCollectCash} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1">
-                  Cash Amount (AED)
-                </label>
-                <input
-                  type="number"
-                  required
-                  value={amount}
-                  onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full min-h-[44px] rounded-lg border border-stone-300 bg-white px-4 font-mono text-stone-900 focus:border-stone-900 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1">
-                  Receipt Reference Number
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="CASH-REC-2026-003"
-                  value={reference}
-                  onChange={(e) => setReference(e.target.value)}
-                  className="w-full min-h-[44px] rounded-lg border border-stone-300 bg-white px-4 font-mono text-stone-900 focus:border-stone-900 focus:outline-none"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsCollectOpen(false)}
-                  className="min-h-[44px] flex-1 rounded-lg border border-stone-300 bg-white font-bold text-stone-700 hover:bg-stone-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="min-h-[44px] flex-1 rounded-lg bg-stone-900 font-bold text-yellow-400 hover:bg-stone-800"
-                >
-                  Issue Receipt
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+function SubscriptionAction({ item, actionNonce }: { item: SubscriptionItem; actionNonce: string }) {
+  const operation = item.status === "active" ? "suspend" : "resume"; const [state, action, pending] = useActionState(platformAction, INITIAL_ACTION_STATE);
+  return <details className="min-w-72"><summary className={`min-h-[44px] cursor-pointer rounded-lg px-3 py-3 text-center text-xs font-bold ${operation === "suspend" ? "border border-red-300 text-red-700" : "bg-stone-900 text-yellow-400"}`}>{operation === "suspend" ? "Suspend" : "Resume"}</summary><form action={action} className="mt-3 rounded-lg border border-stone-200 bg-stone-50 p-4 text-left">
+    <input type="hidden" name="operation" value={operation} /><input type="hidden" name="subscriptionId" value={item.id} /><input type="hidden" name="idempotencyKey" value={`ui:${actionNonce}:${operation}:${item.id}`} />
+    {operation === "suspend" && <label className="block text-xs font-bold">Reason<select name="suspensionReason" className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2"><option value="non_payment">Non-payment</option><option value="manual">Manual</option><option value="security">Security</option><option value="offboarding">Offboarding</option></select></label>}
+    <label className="mt-3 block text-xs font-bold">Explanation<input name="reason" required minLength={1} maxLength={500} className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2" /></label>
+    <label className="mt-3 block text-xs font-bold">Type subscription ID<input name="confirmScope" required className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2 font-mono" /></label>
+    <label className="mt-3 block text-xs font-bold">Type CONFIRM<input name="confirmConsequence" required pattern="CONFIRM" className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2 font-mono" /></label>
+    <Result state={state} /><button disabled={pending} className={`mt-3 min-h-11 w-full rounded font-bold ${operation === "suspend" ? "bg-red-600 text-white" : "bg-stone-900 text-yellow-400"}`}>{pending ? "Working…" : `Confirm ${operation}`}</button>
+  </form></details>;
 }
+
+function ReversalAction({ receipt, actionNonce }: { receipt: ReceiptItem; actionNonce: string }) {
+  const [state, action, pending] = useActionState(platformAction, INITIAL_ACTION_STATE);
+  return <details className="min-w-72"><summary className="min-h-[44px] cursor-pointer rounded-lg border border-red-300 px-3 py-3 text-center text-xs font-bold text-red-700">Reverse receipt</summary><form action={action} className="mt-3 rounded-lg border border-stone-200 bg-stone-50 p-4 text-left"><input type="hidden" name="operation" value="reverse_receipt" /><input type="hidden" name="receiptId" value={receipt.id} /><input type="hidden" name="idempotencyKey" value={`ui:${actionNonce}:reverse:${receipt.id}`} />
+    <label className="block text-xs font-bold">Reversal reference<input name="reference" required maxLength={100} className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2" /></label><label className="mt-3 block text-xs font-bold">Reason<input name="reason" required maxLength={1000} className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2" /></label><label className="mt-3 block text-xs font-bold">Type receipt ID<input name="confirmScope" required className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2 font-mono" /></label><label className="mt-3 block text-xs font-bold">Type CONFIRM<input name="confirmConsequence" required pattern="CONFIRM" className="mt-1 min-h-11 w-full rounded border border-stone-300 bg-white px-2 font-mono" /></label><Result state={state} /><button disabled={pending} className="mt-3 min-h-11 w-full rounded bg-red-600 font-bold text-white">{pending ? "Reversing…" : "Confirm reversal"}</button>
+  </form></details>;
+}
+
+export function BillingSubscriptionsView({ subscriptions, receipts, tenants, actionNonce }: Props) {
+  const [showReceipt, setShowReceipt] = useState(false); const [state, action, pending] = useActionState(platformAction, INITIAL_ACTION_STATE); const names = new Map(tenants.map((tenant) => [tenant.id, tenant.displayName]));
+  return <section className="space-y-6" aria-labelledby="billing-heading">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-5"><div><h2 id="billing-heading" className="text-2xl font-bold">Subscriptions & cash receipts</h2><p className="mt-1 text-sm text-stone-500">Append-only coverage and guarded state changes</p></div><button type="button" onClick={() => setShowReceipt((value) => !value)} className="min-h-[44px] rounded-lg bg-stone-900 px-5 font-bold text-yellow-400">{showReceipt ? "Close receipt form" : "Record cash payment"}</button></div>
+    {showReceipt && <form action={action} className="rounded-xl border border-yellow-500/40 bg-white p-6"><input type="hidden" name="operation" value="cash_receipt" /><input type="hidden" name="idempotencyKey" value={`ui:${actionNonce}:cash-receipt`} /><h3 className="text-lg font-bold">Record cash payment</h3><div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3"><label className="text-sm font-semibold">Subscription<select name="subscriptionId" required className="mt-2 min-h-12 w-full rounded border border-stone-300 bg-white px-3"><option value="">Choose subscription</option>{subscriptions.items.map((item) => <option key={item.id} value={item.id}>{names.get(item.businessId) ?? item.businessId} · {item.scope} · through {item.paidUntil}</option>)}</select></label><Input name="amount" label="Amount (AED)" required pattern="\d+(\.\d{1,2})?" /><Input name="reference" label="Receipt reference" required /><Input name="coverageFrom" label="Coverage from" type="date" required /><Input name="coverageUntil" label="Coverage until" type="date" required /><Input name="evidenceNote" label="Evidence note (optional)" /></div><Result state={state} /><button disabled={pending} className="mt-5 min-h-12 rounded bg-stone-900 px-6 font-bold text-yellow-400">{pending ? "Recording…" : "Record cash payment"}</button></form>}
+
+    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white"><div className="border-b border-stone-200 p-4"><h3 className="font-bold">Subscriptions</h3></div><div className="overflow-x-auto"><table className="w-full min-w-[60rem] text-left text-sm"><thead className="bg-stone-50 text-xs uppercase text-stone-500"><tr><th className="p-4">Business / scope</th><th className="p-4">Coverage</th><th className="p-4">Status</th><th className="p-4">Subscription ID</th><th className="p-4 text-right">Action</th></tr></thead><tbody className="divide-y divide-stone-200">{subscriptions.items.map((item) => <tr key={item.id}><td className="p-4 font-bold">{names.get(item.businessId) ?? "Business"}<p className="font-normal text-stone-500">{item.scope}</p></td><td className="p-4 font-mono text-xs">{item.paidFrom} → {item.paidUntil}</td><td className="p-4"><span className="rounded-full border px-3 py-1 text-xs font-bold uppercase">{item.status}</span></td><td className="p-4 font-mono text-xs text-stone-500">{item.id}</td><td className="p-4 text-right"><SubscriptionAction item={item} actionNonce={actionNonce} /></td></tr>)}</tbody></table></div><Pager cursorKey="subscriptions_cursor" nextCursor={subscriptions.nextCursor} /></div>
+
+    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white"><div className="border-b border-stone-200 p-4"><h3 className="font-bold">Cash receipt history</h3></div><div className="overflow-x-auto"><table className="w-full min-w-[68rem] text-left text-sm"><thead className="bg-stone-50 text-xs uppercase text-stone-500"><tr><th className="p-4">Reference</th><th className="p-4">Business</th><th className="p-4 text-right">Amount</th><th className="p-4">Coverage</th><th className="p-4">Collected</th><th className="p-4">State</th><th className="p-4 text-right">Action</th></tr></thead><tbody className="divide-y divide-stone-200">{receipts.items.map((item) => <tr key={item.id}><td className="p-4 font-mono font-bold">{item.reference}</td><td className="p-4">{names.get(item.businessId) ?? "Business"}</td><td className="p-4 text-right font-mono font-bold">{item.currency} {item.amount}</td><td className="p-4 font-mono text-xs">{item.coverageFrom} → {item.coverageUntil}</td><td className="p-4">{new Date(item.collectedAt).toLocaleString("en-AE", { timeZone: "Asia/Dubai" })}</td><td className="p-4">{item.reversalOfId ? "Reversal" : "Receipt"}</td><td className="p-4 text-right">{!item.reversalOfId && <ReversalAction receipt={item} actionNonce={actionNonce} />}</td></tr>)}</tbody></table></div><Pager cursorKey="receipts_cursor" nextCursor={receipts.nextCursor} /></div>
+  </section>;
+}
+
+function Input({ name, label, ...props }: { name: string; label: string; required?: boolean; type?: string; pattern?: string }) { return <label className="text-sm font-semibold">{label}<input name={name} {...props} className="mt-2 min-h-12 w-full rounded border border-stone-300 px-3" /></label>; }

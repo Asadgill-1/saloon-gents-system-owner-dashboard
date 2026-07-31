@@ -10,7 +10,7 @@ Phase 5 frontend for the platform owner’s SaaS operations.
 - Tenant exports and export-first soft offboarding.
 - Global analytics, bot fleet, escalations, blocks, audit/security, and backup status.
 
-Status: Phase 0 Next.js foundation and the narrow Phase 1 T1.5 database-authorized global platform shell are verified. Shared backend Phase 2 T2.0–T2.3 is complete and T2.4 checkout/payments/commission is next; Phase 1 audit gates remain open. Platform product screens still begin in Phase 5 after the backend gates.
+Status: Phase 5 recovery is in progress. The recovery branch has cookie-based Supabase SSR, database-authorized platform access, FastAPI-backed operational views, keyset pagination, and guarded idempotent Server Actions. Remaining platform modules, staging E2E/accessibility gates, and the Phase 5 security audit keep the phase incomplete.
 
 ## Required reading
 
@@ -25,7 +25,7 @@ Canonical backend/docs: [gents-saloon-backend](https://github.com/Asadgill-1/gen
 
 ## Stack
 
-Current foundation: Next.js App Router, strict TypeScript, Tailwind, Supabase SSR Auth, and a server-only FastAPI platform-authorization check. Planned Phase 5 additions such as shadcn/Radix, Lucide, charts, and product integrations are not installed or implemented yet.
+Current foundation: Next.js App Router, strict TypeScript, Tailwind, cookie-based Supabase SSR Auth, and server-only FastAPI reads and mutations. No new UI/chart dependency was added; dense native tables/forms retain the approved light platform styling.
 
 ## Public frontend environment
 
